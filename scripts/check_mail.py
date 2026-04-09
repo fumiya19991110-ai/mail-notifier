@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Xserver メール監視スクリプト
-件名に「【新規お客様メッセージ】」が含まれるメールをntfyに通知する
+件名に「新規お客様メッセージ」が含まれるメールをntfyに通知する
 """
 import email
 import email.header
 import imaplib
 import json
 import os
-import sys
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -19,7 +18,7 @@ IMAP_PORT = 993
 MAIL_USER = "sekimoto@greatwork.jp"
 MAIL_PASS = os.environ["MAIL_PASSWORD"]
 
-SUBJECT_KEYWORD = "【新規お客様メッセージ】"
+SUBJECT_KEYWORD = "新規お客様メッセージ"
 NTFY_URL = "https://ntfy.sh/manga-out"
 STATE_FILE = Path(__file__).parent.parent / "data" / "state.json"
 
