@@ -14,21 +14,20 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-IMAP_HOST = "mail.greatwork.jp"
+IMAP_HOST = "sv13147.xserver.jp"
 IMAP_PORT = 993
 MAIL_USER = "sekimoto@greatwork.jp"
 MAIL_PASS = os.environ["MAIL_PASSWORD"]
 
 SUBJECT_KEYWORD = "【新規お客様メッセージ】"
-NTFY_URL = "https://ntfy.sh/manga-out"   # manga-outトピックを流用（必要なら別トピックに）
+NTFY_URL = "https://ntfy.sh/manga-out"
 STATE_FILE = Path(__file__).parent.parent / "data" / "state.json"
 
 JST = timezone(timedelta(hours=9))
-BODY_MAX_LEN = 1000  # 通知本文の最大文字数
+BODY_MAX_LEN = 1000
 
 
 def decode_header_value(value: str) -> str:
-    """メールヘッダーのエンコードをデコードする"""
     parts = email.header.decode_header(value)
     decoded = []
     for part, charset in parts:
@@ -40,7 +39,6 @@ def decode_header_value(value: str) -> str:
 
 
 def get_body(msg) -> str:
-    """メール本文をテキストで取得する"""
     body = ""
     if msg.is_multipart():
         for part in msg.walk():
@@ -73,11 +71,9 @@ def save_state(state: dict) -> None:
 
 
 def send_ntfy(subject: str, body: str) -> None:
-    # 通知本文: 件名 + 本文（長すぎる場合は切り詰め）
     body_preview = body[:BODY_MAX_LEN] + ("..." if len(body) > BODY_MAX_LEN else "")
     message = f"{subject}\n\n{body_preview}".strip()
     data = message.encode("utf-8")
-
     req = urllib.request.Request(
         NTFY_URL,
         data=data,
@@ -106,7 +102,6 @@ def main() -> None:
         mail.login(MAIL_USER, MAIL_PASS)
         mail.select("INBOX")
 
-        # last_uid より大きいUIDのメールを検索
         search_criterion = f"UID {last_uid + 1}:*"
         status, data = mail.uid("search", None, search_criterion)
         if status != "OK":
@@ -114,7 +109,7 @@ def main() -> None:
             return
 
         uid_list = data[0].split() if data[0] else []
-        print(f"新着メール数: {len(uid_list)}")
+        print(f"未確認メール数: {len(uid_list)}")
 
         max_uid = last_uid
         notified = 0
@@ -124,7 +119,6 @@ def main() -> None:
             if uid <= last_uid:
                 continue
 
-            # メール取得
             status, msg_data = mail.uid("fetch", uid_bytes, "(RFC822)")
             if status != "OK":
                 continue
@@ -139,7 +133,7 @@ def main() -> None:
 
             if SUBJECT_KEYWORD in subject:
                 body = get_body(msg)
-                print(f"  → キーワード一致！通知送信")
+                print(f"  -> キーワード一致！通知送信")
                 send_ntfy(subject, body)
                 notified += 1
 
