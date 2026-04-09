@@ -19,7 +19,7 @@ MAIL_USER = "sekimoto@greatwork.jp"
 MAIL_PASS = os.environ["MAIL_PASSWORD"]
 
 SUBJECT_KEYWORD = "新規お客様メッセージ"
-NTFY_URL = "https://ntfy.sh/manga-out"
+NTFY_URL = "https://ntfy.sh/new-customer-message"
 STATE_FILE = Path(__file__).parent.parent / "data" / "state.json"
 
 JST = timezone(timedelta(hours=9))
